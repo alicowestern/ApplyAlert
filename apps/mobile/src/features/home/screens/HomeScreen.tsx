@@ -52,7 +52,6 @@ export function HomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
     }
   }
 
-  const activeCount = urgent.length + upcoming.length + needsAttention.length;
 
   if (opportunities && opportunities.length === 0) {
     return (

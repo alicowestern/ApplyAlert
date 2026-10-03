@@ -70,17 +70,6 @@ function ImportOption({ IconComponent, label, description, onPress, testID, disa
 export function AddOpportunityScreen({ navigation }: AddStackScreenProps<'AddMain'>) {
   const theme = useAppTheme();
 
-  const handlePasteLink = () => {
-    // Will be implemented in a future task
-  };
-
-  const handlePickImage = () => {
-    // Will be implemented in a future task
-  };
-
-  const handlePickPdf = () => {
-    // Will be implemented in a future task
-  };
 
   const handleManualAdd = () => {
     navigation.navigate('ManualAdd');

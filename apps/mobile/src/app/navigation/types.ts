@@ -12,23 +12,31 @@ import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigat
 export type HomeStackParamList = {
   HomeMain: undefined;
   OpportunityDetail: { id: string };
+  EditOpportunity: { id: string };
 };
 
 export type AddStackParamList = {
   AddMain: undefined;
   ManualAdd: undefined;
+  ReviewOpportunity: { initialData: any };
 };
 
 export type ApplicationsStackParamList = {
   ApplicationsMain: undefined;
   OpportunityDetail: { id: string };
+  EditOpportunity: { id: string };
+};
+
+export type SettingsStackParamList = {
+  SettingsMain: undefined;
+  ArchivedOpportunities: undefined;
 };
 
 export type RootTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList>;
   AddOpportunity: NavigatorScreenParams<AddStackParamList>;
   Applications: NavigatorScreenParams<ApplicationsStackParamList>;
-  Settings: undefined;
+  Settings: NavigatorScreenParams<SettingsStackParamList>;
 };
 
 export type RootTabScreenProps<T extends keyof RootTabParamList> = BottomTabScreenProps<
@@ -49,4 +57,9 @@ export type AddStackScreenProps<T extends keyof AddStackParamList> = CompositeSc
 export type ApplicationsStackScreenProps<T extends keyof ApplicationsStackParamList> = CompositeScreenProps<
   NativeStackScreenProps<ApplicationsStackParamList, T>,
   RootTabScreenProps<'Applications'>
+>;
+
+export type SettingsStackScreenProps<T extends keyof SettingsStackParamList> = CompositeScreenProps<
+  NativeStackScreenProps<SettingsStackParamList, T>,
+  RootTabScreenProps<'Settings'>
 >;

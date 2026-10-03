@@ -16,16 +16,20 @@ import { Home, PlusCircle, Inbox, Settings } from 'lucide-react-native';
 import { HomeScreen } from '../../features/home/screens/HomeScreen';
 import { AddOpportunityScreen } from '../../features/import/screens/AddOpportunityScreen';
 import { ManualAddScreen } from '../../features/import/screens/ManualAddScreen';
+import { ReviewOpportunityScreen } from '../../features/import/screens/ReviewOpportunityScreen';
 import { ApplicationsScreen } from '../../features/opportunity/screens/ApplicationsScreen';
 import { OpportunityDetailScreen } from '../../features/opportunity/screens/OpportunityDetailScreen';
 import { SettingsScreen } from '../../features/settings/screens/SettingsScreen';
+import { ArchivedOpportunitiesScreen } from '../../features/settings/screens/ArchivedOpportunitiesScreen';
+import { EditOpportunityScreen } from '../../features/opportunity/screens/EditOpportunityScreen';
 
-import type { RootTabParamList, HomeStackParamList, AddStackParamList, ApplicationsStackParamList } from './types';
+import type { RootTabParamList, HomeStackParamList, AddStackParamList, ApplicationsStackParamList, SettingsStackParamList } from './types';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const AddStack = createNativeStackNavigator<AddStackParamList>();
 const ApplicationsStack = createNativeStackNavigator<ApplicationsStackParamList>();
+const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 
 function HomeIcon({ color, size }: { color: string; size: number }) {
   return <Home color={color} size={size} />;
@@ -45,6 +49,7 @@ function HomeStackNavigator() {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="OpportunityDetail" component={OpportunityDetailScreen} />
+      <HomeStack.Screen name="EditOpportunity" component={EditOpportunityScreen} />
     </HomeStack.Navigator>
   );
 }
@@ -54,6 +59,7 @@ function AddStackNavigator() {
     <AddStack.Navigator screenOptions={{ headerShown: false }}>
       <AddStack.Screen name="AddMain" component={AddOpportunityScreen} />
       <AddStack.Screen name="ManualAdd" component={ManualAddScreen} />
+      <AddStack.Screen name="ReviewOpportunity" component={ReviewOpportunityScreen} />
     </AddStack.Navigator>
   );
 }
@@ -63,7 +69,17 @@ function ApplicationsStackNavigator() {
     <ApplicationsStack.Navigator screenOptions={{ headerShown: false }}>
       <ApplicationsStack.Screen name="ApplicationsMain" component={ApplicationsScreen} />
       <ApplicationsStack.Screen name="OpportunityDetail" component={OpportunityDetailScreen} />
+      <ApplicationsStack.Screen name="EditOpportunity" component={EditOpportunityScreen} />
     </ApplicationsStack.Navigator>
+  );
+}
+
+function SettingsStackNavigator() {
+  return (
+    <SettingsStack.Navigator screenOptions={{ headerShown: false }}>
+      <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
+      <SettingsStack.Screen name="ArchivedOpportunities" component={ArchivedOpportunitiesScreen} />
+    </SettingsStack.Navigator>
   );
 }
 
@@ -106,11 +122,10 @@ export function RootNavigator() {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsStackNavigator}
         options={{ tabBarLabel: 'Settings', tabBarIcon: SettingsIcon }}
       />
     </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({});
