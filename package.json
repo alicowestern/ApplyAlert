@@ -1,0 +1,22 @@
+{
+  "name": "applyalert",
+  "version": "0.0.1",
+  "private": true,
+  "description": "AI-powered opportunity deadline and reminder assistant",
+  "scripts": {
+    "mobile": "pnpm --filter @applyalert/mobile",
+    "mobile:android": "pnpm --filter @applyalert/mobile android",
+    "mobile:start": "pnpm --filter @applyalert/mobile start",
+    "mobile:test": "pnpm --filter @applyalert/mobile test",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "pnpm -r exec -- rm -rf node_modules && rm -rf node_modules"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@9.15.9"
+}
