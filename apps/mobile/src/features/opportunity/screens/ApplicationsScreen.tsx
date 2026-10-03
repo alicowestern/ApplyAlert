@@ -1,18 +1,13 @@
-/**
- * Applications screen â€” tracks application status.
- *
- * Will eventually support tabs/filtering for:
- * - Saved
- * - Preparing
- * - Applied
- */
-
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { Typography } from '../../../components/Typography';
+import { OpportunityCard } from '../../../components/OpportunityCard';
+import { EmptyState } from '../../../components/EmptyState';
 import { useAppTheme } from '../../../hooks/useAppTheme';
+import { useOpportunitiesByStatus } from '../../../data/hooks/useOpportunityQueries';
 import type { ApplicationStatus } from '@applyalert/contracts';
+import type { ApplicationsStackScreenProps } from '../../../app/navigation/types';
 
 const STATUS_TABS: Array<{ key: ApplicationStatus; label: string }> = [
   { key: 'SAVED', label: 'Saved' },
@@ -20,17 +15,23 @@ const STATUS_TABS: Array<{ key: ApplicationStatus; label: string }> = [
   { key: 'APPLIED', label: 'Applied' },
 ];
 
-export function ApplicationsScreen() {
+export function ApplicationsScreen({ navigation }: ApplicationsStackScreenProps<'ApplicationsMain'>) {
   const theme = useAppTheme();
   const [activeTab, setActiveTab] = useState<ApplicationStatus>('SAVED');
+  
+  const { data: opportunities, isLoading } = useOpportunitiesByStatus(activeTab);
+
+  const handlePress = (id: string) => {
+    navigation.navigate('OpportunityDetail', { id });
+  };
 
   return (
-    <ScreenContainer testID="applications-screen">
-      <View style={styles.header}>
+    <ScreenContainer testID="applications-screen" noPadding>
+      <View style={[styles.header, { paddingHorizontal: theme.spacing.lg }]}>
         <Typography variant="heading1">Applications</Typography>
       </View>
 
-      <View style={[styles.tabs, { borderBottomColor: theme.colors.border }]}>
+      <View style={[styles.tabs, { borderBottomColor: theme.colors.border, paddingHorizontal: theme.spacing.lg }]}>
         {STATUS_TABS.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -55,21 +56,24 @@ export function ApplicationsScreen() {
         })}
       </View>
 
-      <View style={styles.content}>
-        <View
-          style={[
-            styles.emptyState,
-            {
-              backgroundColor: theme.colors.surface,
-              borderRadius: theme.radius.md,
-              borderColor: theme.colors.border,
-            },
-          ]}
-        >
-          <Typography variant="body" color={theme.colors.textTertiary} align="center">
-            No {activeTab.toLowerCase()} applications
-          </Typography>
-        </View>
+      <View style={[styles.content, { paddingHorizontal: theme.spacing.lg }]}>
+        {isLoading ? (
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+          </View>
+        ) : opportunities && opportunities.length > 0 ? (
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            {opportunities.map(opp => (
+              <OpportunityCard key={opp.id} opportunity={opp} onPress={() => handlePress(opp.id)} />
+            ))}
+          </ScrollView>
+        ) : (
+          <EmptyState 
+            title={`No ${activeTab.toLowerCase()} applications`} 
+            description="Opportunities will appear here as you change their status." 
+            icon="📂" 
+          />
+        )}
       </View>
     </ScreenContainer>
   );
@@ -98,10 +102,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  emptyState: {
-    padding: 32,
-    borderWidth: 1,
-    alignItems: 'center',
+  scrollContent: {
+    paddingBottom: 24,
+  },
+  centerContent: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
 });

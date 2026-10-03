@@ -8,7 +8,7 @@ module.exports = {
     '^@applyalert/validation/(.*)$': '<rootDir>/../../packages/validation/src/$1',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|react-native-screens|react-native-safe-area-context|@tanstack)/)',
+    'node_modules/(?!(react-native|@react-native|@react-navigation|react-native-screens|react-native-safe-area-context|@tanstack|react-native-get-random-values|uuid|react-native-mmkv)/)',
   ],
   testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
   collectCoverageFrom: [

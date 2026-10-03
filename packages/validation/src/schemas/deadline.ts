@@ -50,7 +50,7 @@ export const DeadlineSchema = z.object({
   confidence: z.number().min(0).max(1),
   userConfirmed: z.boolean(),
   evidence: z.string().nullable(),
-  alternativeCandidates: z.array(z.string()),
+  alternativeCandidates: z.array(z.string()).readonly(),
 }).refine(
   (data) => {
     // utcInstant should only be set when all components are known

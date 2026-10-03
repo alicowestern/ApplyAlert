@@ -15,6 +15,7 @@ export {
   OpportunityTypeSchema,
   ApplicationStatusSchema,
   FundingInfoSchema,
+  SourceContentTypeSchema,
   OpportunitySourceSchema,
   OpportunitySchema,
   type ValidatedOpportunity,

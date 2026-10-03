@@ -42,13 +42,30 @@ export interface FundingInfo {
 /**
  * Tracks the source from which an opportunity was imported.
  */
+/**
+ * Source content type for how the opportunity was imported.
+ */
+export type SourceContentType = 'URL' | 'TEXT' | 'IMAGE' | 'PDF' | 'ANDROID_SHARE' | 'MANUAL';
+
+/**
+ * Tracks the source from which an opportunity was imported.
+ */
 export interface OpportunitySource {
   /** How the opportunity was imported. */
-  readonly type: 'URL' | 'TEXT' | 'IMAGE' | 'PDF' | 'SHARE' | 'MANUAL';
+  readonly type: SourceContentType;
   /** Original URL if available. */
   readonly url: string | null;
   /** Raw text content if available (pasted text, extracted text). */
   readonly rawText: string | null;
+  /** Original filename if imported from file. */
+  readonly fileName: string | null;
+  /** MIME type when applicable (e.g., "image/png", "application/pdf"). */
+  readonly mimeType: string | null;
+  /**
+   * Reference to a locally stored file (path or future object-storage key).
+   * Binary data is NOT stored in the opportunity record.
+   */
+  readonly fileRef: string | null;
   /** Timestamp of import. */
   readonly importedAt: string;
 }
@@ -98,4 +115,10 @@ export interface Opportunity {
 
   /** ISO 8601 timestamp of last update. */
   readonly updatedAt: string;
+
+  /** ISO 8601 timestamp of when the user marked APPLIED. Null otherwise. */
+  readonly appliedAt: string | null;
+
+  /** ISO 8601 timestamp of when the opportunity was archived. Null otherwise. */
+  readonly archivedAt: string | null;
 }

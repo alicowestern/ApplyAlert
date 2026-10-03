@@ -31,10 +31,22 @@ export const FundingInfoSchema = z.object({
   details: z.string().nullable(),
 });
 
+export const SourceContentTypeSchema = z.enum([
+  'URL',
+  'TEXT',
+  'IMAGE',
+  'PDF',
+  'ANDROID_SHARE',
+  'MANUAL',
+]);
+
 export const OpportunitySourceSchema = z.object({
-  type: z.enum(['URL', 'TEXT', 'IMAGE', 'PDF', 'SHARE', 'MANUAL']),
+  type: SourceContentTypeSchema,
   url: z.string().url().nullable(),
   rawText: z.string().nullable(),
+  fileName: z.string().nullable(),
+  mimeType: z.string().nullable(),
+  fileRef: z.string().nullable(),
   importedAt: z.string(),
 });
 
@@ -52,6 +64,8 @@ export const OpportunitySchema = z.object({
   status: ApplicationStatusSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
+  appliedAt: z.string().nullable(),
+  archivedAt: z.string().nullable(),
 });
 
 export type ValidatedOpportunity = z.infer<typeof OpportunitySchema>;

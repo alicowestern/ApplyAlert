@@ -16,6 +16,7 @@ export type {
   OpportunityType,
   ApplicationStatus,
   FundingInfo,
+  SourceContentType,
   OpportunitySource,
   Opportunity,
 } from './domain/opportunity';

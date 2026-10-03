@@ -6,25 +6,47 @@
  */
 
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 
-/**
- * Root tab navigator param list.
- * Each key is a tab name, value is the params (undefined = no params).
- */
+export type HomeStackParamList = {
+  HomeMain: undefined;
+  OpportunityDetail: { id: string };
+};
+
+export type AddStackParamList = {
+  AddMain: undefined;
+  ManualAdd: undefined;
+};
+
+export type ApplicationsStackParamList = {
+  ApplicationsMain: undefined;
+  OpportunityDetail: { id: string };
+};
+
 export type RootTabParamList = {
-  Home: undefined;
-  AddOpportunity: undefined;
-  Applications: undefined;
+  Home: NavigatorScreenParams<HomeStackParamList>;
+  AddOpportunity: NavigatorScreenParams<AddStackParamList>;
+  Applications: NavigatorScreenParams<ApplicationsStackParamList>;
   Settings: undefined;
 };
 
-/**
- * Helper type for screen props in the tab navigator.
- */
 export type RootTabScreenProps<T extends keyof RootTabParamList> = BottomTabScreenProps<
   RootTabParamList,
   T
 >;
 
-// Future: when we add stack navigators inside tabs
-// export type HomeStackParamList = { ... };
+export type HomeStackScreenProps<T extends keyof HomeStackParamList> = CompositeScreenProps<
+  NativeStackScreenProps<HomeStackParamList, T>,
+  RootTabScreenProps<'Home'>
+>;
+
+export type AddStackScreenProps<T extends keyof AddStackParamList> = CompositeScreenProps<
+  NativeStackScreenProps<AddStackParamList, T>,
+  RootTabScreenProps<'AddOpportunity'>
+>;
+
+export type ApplicationsStackScreenProps<T extends keyof ApplicationsStackParamList> = CompositeScreenProps<
+  NativeStackScreenProps<ApplicationsStackParamList, T>,
+  RootTabScreenProps<'Applications'>
+>;

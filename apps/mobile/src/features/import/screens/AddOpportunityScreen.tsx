@@ -13,6 +13,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { Typography } from '../../../components/Typography';
 import { useAppTheme } from '../../../hooks/useAppTheme';
+import type { AddStackScreenProps } from '../../../app/navigation/types';
 
 interface ImportOptionProps {
   icon: string;
@@ -52,7 +53,7 @@ function ImportOption({ icon, label, description, onPress, testID }: ImportOptio
   );
 }
 
-export function AddOpportunityScreen() {
+export function AddOpportunityScreen({ navigation }: AddStackScreenProps<'AddMain'>) {
   const theme = useAppTheme();
 
   const handlePasteLink = () => {
@@ -65,6 +66,10 @@ export function AddOpportunityScreen() {
 
   const handlePickPdf = () => {
     // Will be implemented in a future task
+  };
+
+  const handleManualAdd = () => {
+    navigation.navigate('ManualAdd');
   };
 
   return (
@@ -103,6 +108,14 @@ export function AddOpportunityScreen() {
           label="PDF Document"
           description="Select a PDF with opportunity details"
           onPress={handlePickPdf}
+        />
+
+        <ImportOption
+          testID="import-option-manual"
+          icon="✍️"
+          label="Manual Entry"
+          description="Type details manually (for testing)"
+          onPress={handleManualAdd}
         />
       </View>
     </ScreenContainer>
