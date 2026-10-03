@@ -8,8 +8,9 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useAppTheme } from '../../hooks/useAppTheme';
+import { Home, PlusCircle, Inbox, Settings } from 'lucide-react-native';
 
 // Screens
 import { HomeScreen } from '../../features/home/screens/HomeScreen';
@@ -26,17 +27,17 @@ const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const AddStack = createNativeStackNavigator<AddStackParamList>();
 const ApplicationsStack = createNativeStackNavigator<ApplicationsStackParamList>();
 
-function HomeIcon() {
-  return <Text style={styles.tabIcon}>🏠</Text>;
+function HomeIcon({ color, size }: { color: string; size: number }) {
+  return <Home color={color} size={size} />;
 }
-function AddIcon() {
-  return <Text style={styles.tabIcon}>➕</Text>;
+function AddIcon({ color, size }: { color: string; size: number }) {
+  return <PlusCircle color={color} size={size} />;
 }
-function ApplicationsIcon() {
-  return <Text style={styles.tabIcon}>📋</Text>;
+function ApplicationsIcon({ color, size }: { color: string; size: number }) {
+  return <Inbox color={color} size={size} />;
 }
-function SettingsIcon() {
-  return <Text style={styles.tabIcon}>⚙️</Text>;
+function SettingsIcon({ color, size }: { color: string; size: number }) {
+  return <Settings color={color} size={size} />;
 }
 
 function HomeStackNavigator() {
@@ -112,8 +113,4 @@ export function RootNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
-  tabIcon: {
-    fontSize: 20,
-  },
-});
+const styles = StyleSheet.create({});

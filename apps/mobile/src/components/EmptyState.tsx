@@ -2,14 +2,16 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Typography } from './Typography';
 import { useAppTheme } from '../hooks/useAppTheme';
+import { Inbox } from 'lucide-react-native';
+import { LucideIcon } from 'lucide-react-native';
 
 interface EmptyStateProps {
   title: string;
   description: string;
-  icon?: string;
+  IconComponent?: LucideIcon;
 }
 
-export function EmptyState({ title, description, icon = '📭' }: EmptyStateProps) {
+export function EmptyState({ title, description, IconComponent = Inbox }: EmptyStateProps) {
   const theme = useAppTheme();
 
   return (
@@ -23,9 +25,9 @@ export function EmptyState({ title, description, icon = '📭' }: EmptyStateProp
         },
       ]}
     >
-      <Typography variant="display" style={styles.icon}>
-        {icon}
-      </Typography>
+      <View style={styles.icon}>
+        <IconComponent size={48} color={theme.colors.textTertiary} strokeWidth={1.5} />
+      </View>
       <Typography variant="heading3" align="center" style={styles.title}>
         {title}
       </Typography>

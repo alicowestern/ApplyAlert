@@ -8,6 +8,8 @@ import { useAppTheme } from '../../../hooks/useAppTheme';
 import { useOpportunitiesByStatus } from '../../../data/hooks/useOpportunityQueries';
 import type { ApplicationStatus } from '@applyalert/contracts';
 import type { ApplicationsStackScreenProps } from '../../../app/navigation/types';
+import { FolderOpen, Search } from 'lucide-react-native';
+import { TextInput } from 'react-native';
 
 const STATUS_TABS: Array<{ key: ApplicationStatus; label: string }> = [
   { key: 'SAVED', label: 'Saved' },
@@ -18,8 +20,18 @@ const STATUS_TABS: Array<{ key: ApplicationStatus; label: string }> = [
 export function ApplicationsScreen({ navigation }: ApplicationsStackScreenProps<'ApplicationsMain'>) {
   const theme = useAppTheme();
   const [activeTab, setActiveTab] = useState<ApplicationStatus>('SAVED');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const { data: opportunities, isLoading } = useOpportunitiesByStatus(activeTab);
+
+  const filteredOpportunities = opportunities?.filter(opp => {
+    if (!searchQuery) return true;
+    const lowerQuery = searchQuery.toLowerCase();
+    return (
+      opp.title.toLowerCase().includes(lowerQuery) ||
+      (opp.organization && opp.organization.toLowerCase().includes(lowerQuery))
+    );
+  }) || [];
 
   const handlePress = (id: string) => {
     navigation.navigate('OpportunityDetail', { id });
@@ -56,22 +68,35 @@ export function ApplicationsScreen({ navigation }: ApplicationsStackScreenProps<
         })}
       </View>
 
+      <View style={[styles.searchContainer, { paddingHorizontal: theme.spacing.lg }]}>
+        <View style={[styles.searchInputWrapper, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+          <Search color={theme.colors.textTertiary} size={18} style={styles.searchIcon} />
+          <TextInput
+            style={[styles.searchInput, { color: theme.colors.textPrimary }]}
+            placeholder="Search title or organization..."
+            placeholderTextColor={theme.colors.textTertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
       <View style={[styles.content, { paddingHorizontal: theme.spacing.lg }]}>
         {isLoading ? (
           <View style={styles.centerContent}>
             <ActivityIndicator size="large" color={theme.colors.primary[500]} />
           </View>
-        ) : opportunities && opportunities.length > 0 ? (
+        ) : filteredOpportunities.length > 0 ? (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-            {opportunities.map(opp => (
+            {filteredOpportunities.map(opp => (
               <OpportunityCard key={opp.id} opportunity={opp} onPress={() => handlePress(opp.id)} />
             ))}
           </ScrollView>
         ) : (
           <EmptyState 
-            title={`No ${activeTab.toLowerCase()} applications`} 
-            description="Opportunities will appear here as you change their status." 
-            icon="📂" 
+            title={searchQuery ? "No matches found" : `No ${activeTab.toLowerCase()} applications`} 
+            description={searchQuery ? "Try a different search term." : "Opportunities will appear here as you change their status."} 
+            IconComponent={FolderOpen} 
           />
         )}
       </View>
@@ -98,6 +123,25 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
+  },
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 40,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    height: '100%',
+    fontSize: 15,
   },
   content: {
     flex: 1,

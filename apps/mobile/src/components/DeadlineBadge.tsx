@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Typography } from './Typography';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { type DeadlineUrgency, urgencyColor, urgencyLabel } from '../domain/deadline-classification';
+import { type DeadlineUrgency, urgencyLabel } from '../domain/deadline-classification';
+import { Clock, Calendar, AlertTriangle, Infinity as InfinityIcon } from 'lucide-react-native';
 
 interface DeadlineBadgeProps {
   urgency: DeadlineUrgency;
@@ -12,12 +13,46 @@ interface DeadlineBadgeProps {
 export function DeadlineBadge({ urgency, daysRemaining }: DeadlineBadgeProps) {
   const theme = useAppTheme();
   
-  const colorKey = urgencyColor(urgency) as keyof typeof theme.colors.urgency;
-  const color = theme.colors.urgency[colorKey];
+  // Map urgency to deadline token key
+  let deadlineKey: keyof typeof theme.colors.deadline = 'upcoming';
+  let Icon = Calendar;
+
+  switch (urgency) {
+    case 'OVERDUE':
+      deadlineKey = 'overdue';
+      Icon = AlertTriangle;
+      break;
+    case 'TODAY':
+      deadlineKey = 'today';
+      Icon = Clock;
+      break;
+    case 'URGENT':
+      deadlineKey = 'urgent';
+      Icon = Clock;
+      break;
+    case 'SOON':
+      deadlineKey = 'soon';
+      Icon = Clock;
+      break;
+    case 'UPCOMING':
+      deadlineKey = 'upcoming';
+      Icon = Calendar;
+      break;
+    case 'ROLLING':
+      deadlineKey = 'rolling';
+      Icon = InfinityIcon;
+      break;
+    case 'AMBIGUOUS':
+      deadlineKey = 'ambiguous';
+      Icon = AlertTriangle;
+      break;
+  }
+
+  const { bg, text } = theme.colors.deadline[deadlineKey];
   
-  let text = urgencyLabel(urgency);
+  let labelText = urgencyLabel(urgency);
   if (daysRemaining !== null && daysRemaining > 0) {
-    text = `${daysRemaining} day${daysRemaining === 1 ? '' : 's'}`;
+    labelText = `${daysRemaining} day${daysRemaining === 1 ? '' : 's'}`;
   }
 
   return (
@@ -25,14 +60,14 @@ export function DeadlineBadge({ urgency, daysRemaining }: DeadlineBadgeProps) {
       style={[
         styles.container,
         {
-          backgroundColor: `${color}1A`, // 10% opacity hex
-          borderColor: `${color}4D`, // 30% opacity hex
+          backgroundColor: bg,
           borderRadius: theme.radius.sm,
         },
       ]}
     >
-      <Typography variant="caption" color={color} style={{ fontWeight: theme.typography.fontWeight.bold }}>
-        {text}
+      <Icon color={text} size={14} style={styles.icon} />
+      <Typography variant="caption" color={text} style={{ fontWeight: theme.typography.fontWeight.bold }}>
+        {labelText}
       </Typography>
     </View>
   );
@@ -42,7 +77,12 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderWidth: 1,
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  icon: {
+    marginRight: 2,
   },
 });

@@ -14,16 +14,18 @@ import { ScreenContainer } from '../../../components/ScreenContainer';
 import { Typography } from '../../../components/Typography';
 import { useAppTheme } from '../../../hooks/useAppTheme';
 import type { AddStackScreenProps } from '../../../app/navigation/types';
+import { Link, Image as ImageIcon, FileText, PenTool, LucideIcon, Lock } from 'lucide-react-native';
 
 interface ImportOptionProps {
-  icon: string;
+  IconComponent: LucideIcon;
   label: string;
   description: string;
-  onPress: () => void;
+  onPress?: () => void;
   testID: string;
+  disabled?: boolean;
 }
 
-function ImportOption({ icon, label, description, onPress, testID }: ImportOptionProps) {
+function ImportOption({ IconComponent, label, description, onPress, testID, disabled = false }: ImportOptionProps) {
   const theme = useAppTheme();
 
   return (
@@ -32,19 +34,31 @@ function ImportOption({ icon, label, description, onPress, testID }: ImportOptio
       style={[
         styles.option,
         {
-          backgroundColor: theme.colors.surface,
+          backgroundColor: disabled ? theme.colors.surface : theme.colors.surfaceElevated,
           borderRadius: theme.radius.md,
           borderColor: theme.colors.border,
+          opacity: disabled ? 0.7 : 1,
         },
       ]}
       onPress={onPress}
       activeOpacity={0.7}
+      disabled={disabled}
     >
-      <Typography variant="heading2" style={styles.optionIcon}>
-        {icon}
-      </Typography>
+      <View style={styles.optionIcon}>
+        <IconComponent size={24} color={disabled ? theme.colors.textTertiary : theme.colors.primary[600]} />
+      </View>
       <View style={styles.optionText}>
-        <Typography variant="heading3">{label}</Typography>
+        <View style={styles.labelRow}>
+          <Typography variant="heading3" color={disabled ? theme.colors.textSecondary : theme.colors.textPrimary}>
+            {label}
+          </Typography>
+          {disabled && (
+            <View style={[styles.comingSoonBadge, { backgroundColor: theme.colors.neutral[200], borderRadius: theme.radius.xs }]}>
+              <Lock size={10} color={theme.colors.textSecondary} style={{ marginRight: 2 }} />
+              <Typography variant="caption" color={theme.colors.textSecondary} style={{ fontSize: 10 }}>Coming soon</Typography>
+            </View>
+          )}
+        </View>
         <Typography variant="bodySmall" color={theme.colors.textSecondary}>
           {description}
         </Typography>
@@ -88,33 +102,33 @@ export function AddOpportunityScreen({ navigation }: AddStackScreenProps<'AddMai
       <View style={styles.options}>
         <ImportOption
           testID="import-option-paste"
-          icon="🔗"
+          IconComponent={Link}
           label="Paste Link or Text"
           description="Paste a URL or text containing opportunity details"
-          onPress={handlePasteLink}
+          disabled={true}
         />
 
         <ImportOption
           testID="import-option-image"
-          icon="📷"
+          IconComponent={ImageIcon}
           label="Image"
           description="Select a screenshot or photo of the opportunity"
-          onPress={handlePickImage}
+          disabled={true}
         />
 
         <ImportOption
           testID="import-option-pdf"
-          icon="📄"
+          IconComponent={FileText}
           label="PDF Document"
           description="Select a PDF with opportunity details"
-          onPress={handlePickPdf}
+          disabled={true}
         />
 
         <ImportOption
           testID="import-option-manual"
-          icon="✍️"
+          IconComponent={PenTool}
           label="Manual Entry"
-          description="Type details manually (for testing)"
+          description="Type details manually"
           onPress={handleManualAdd}
         />
       </View>
@@ -141,8 +155,24 @@ const styles = StyleSheet.create({
   },
   optionIcon: {
     marginRight: 16,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   optionText: {
     flex: 1,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  comingSoonBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginLeft: 8,
   },
 });

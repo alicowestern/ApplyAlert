@@ -44,6 +44,18 @@ export const colors = {
     critical: '#E53935', // Red â€” very soon / overdue
   },
 
+  // Deadline semantic background and text colors
+  deadline: {
+    overdue: { bg: '#FDECEA', text: '#C62828' }, // Error light
+    today: { bg: '#FEF0D9', text: '#FF6F00' }, // High urgency
+    urgent: { bg: '#FEF0D9', text: '#FF8F00' },
+    soon: { bg: '#FFF8E1', text: '#F9A825' }, // Warning light
+    upcoming: { bg: '#E6F7F5', text: '#0A7A6A' }, // Primary light
+    rolling: { bg: '#F1F4F6', text: '#4A5568' }, // Neutral
+    ambiguous: { bg: '#E3F2FD', text: '#1565C0' }, // Info light
+    closed: { bg: '#E4E8EC', text: '#6B7685' },
+  },
+
   // Neutral â€” Cool grays
   neutral: {
     0: '#FFFFFF',

@@ -8,6 +8,19 @@ import { injectSeedData } from '../../../data/seed/devSeedData';
 import { useQueryClient } from '@tanstack/react-query';
 import { opportunityKeys } from '../../../data/hooks/queryKeys';
 import type { AddStackScreenProps } from '../../../app/navigation/types';
+import { z } from 'zod';
+import { ChevronLeft } from 'lucide-react-native';
+
+const FormSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  organization: z.string().optional(),
+  url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be in YYYY-MM-DD format')
+    .optional()
+    .or(z.literal('')),
+});
 
 export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>) {
   const theme = useAppTheme();
@@ -17,11 +30,22 @@ export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>
   const [title, setTitle] = useState('');
   const [organization, setOrganization] = useState('');
   const [url, setUrl] = useState('');
-  const [date, setDate] = useState(''); // YYYY-MM-DD format manually entered for now
+  const [date, setDate] = useState('');
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSave = () => {
-    if (!title.trim()) {
-      Alert.alert('Validation Error', 'Title is required');
+    setErrors({});
+    const result = FormSchema.safeParse({ title, organization, url, date });
+    
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0].toString()] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
       return;
     }
 
@@ -59,8 +83,9 @@ export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>
       },
       {
         onSuccess: () => {
-          navigation.goBack();
-          // Ideally navigate to the newly created details screen, but goBack is fine for now
+          navigation.navigate('HomeTab', {
+            screen: 'HomeMain',
+          });
         },
         onError: (err) => {
           Alert.alert('Error', err.message);
@@ -73,13 +98,14 @@ export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Typography variant="body" color={theme.colors.primary[500]}>← Back</Typography>
+          <ChevronLeft size={20} color={theme.colors.primary[500]} />
+          <Typography variant="body" color={theme.colors.primary[500]}>Back</Typography>
         </TouchableOpacity>
 
         <View style={styles.header}>
           <Typography variant="heading1">Manual Entry</Typography>
           <Typography variant="bodySmall" color={theme.colors.textSecondary}>
-            For testing the domain model without AI extraction
+            Add an opportunity manually
           </Typography>
           <TouchableOpacity 
             style={styles.injectButton} 
@@ -100,18 +126,25 @@ export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>
           <View style={styles.inputGroup}>
             <Typography variant="label">Title *</Typography>
             <TextInput
-              style={[styles.input, { borderColor: theme.colors.border, color: theme.colors.textPrimary }]}
+              style={[
+                styles.input, 
+                { borderColor: errors.title ? theme.colors.error : theme.colors.border, color: theme.colors.textPrimary }
+              ]}
               placeholder="e.g. Summer Internship"
               placeholderTextColor={theme.colors.textTertiary}
               value={title}
               onChangeText={setTitle}
             />
+            {errors.title && <Typography variant="caption" color={theme.colors.error}>{errors.title}</Typography>}
           </View>
 
           <View style={styles.inputGroup}>
             <Typography variant="label">Organization</Typography>
             <TextInput
-              style={[styles.input, { borderColor: theme.colors.border, color: theme.colors.textPrimary }]}
+              style={[
+                styles.input, 
+                { borderColor: theme.colors.border, color: theme.colors.textPrimary }
+              ]}
               placeholder="e.g. Google"
               placeholderTextColor={theme.colors.textTertiary}
               value={organization}
@@ -122,7 +155,10 @@ export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>
           <View style={styles.inputGroup}>
             <Typography variant="label">Application URL</Typography>
             <TextInput
-              style={[styles.input, { borderColor: theme.colors.border, color: theme.colors.textPrimary }]}
+              style={[
+                styles.input, 
+                { borderColor: errors.url ? theme.colors.error : theme.colors.border, color: theme.colors.textPrimary }
+              ]}
               placeholder="https://..."
               placeholderTextColor={theme.colors.textTertiary}
               value={url}
@@ -130,21 +166,29 @@ export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>
               keyboardType="url"
               autoCapitalize="none"
             />
+            {errors.url && <Typography variant="caption" color={theme.colors.error}>{errors.url}</Typography>}
           </View>
 
           <View style={styles.inputGroup}>
-            <Typography variant="label">Deadline Date (YYYY-MM-DD)</Typography>
+            <Typography variant="label">Deadline Date</Typography>
             <TextInput
-              style={[styles.input, { borderColor: theme.colors.border, color: theme.colors.textPrimary }]}
-              placeholder="2027-12-31"
+              style={[
+                styles.input, 
+                { borderColor: errors.date ? theme.colors.error : theme.colors.border, color: theme.colors.textPrimary }
+              ]}
+              placeholder="YYYY-MM-DD"
               placeholderTextColor={theme.colors.textTertiary}
               value={date}
               onChangeText={setDate}
             />
+            {errors.date && <Typography variant="caption" color={theme.colors.error}>{errors.date}</Typography>}
           </View>
 
           <TouchableOpacity 
-            style={[styles.saveButton, { backgroundColor: theme.colors.primary[500] }]}
+            style={[
+              styles.saveButton, 
+              { backgroundColor: createOpportunity.isPending ? theme.colors.neutral[300] : theme.colors.primary[500] }
+            ]}
             onPress={handleSave}
             disabled={createOpportunity.isPending}
           >
@@ -166,6 +210,9 @@ const styles = StyleSheet.create({
   backButton: {
     marginBottom: 16,
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   header: {
     marginBottom: 32,

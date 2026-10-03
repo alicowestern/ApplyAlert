@@ -7,6 +7,7 @@ import { StatusBadge } from './StatusBadge';
 import type { Opportunity } from '@applyalert/contracts';
 import { classifyDeadline } from '../domain/deadline-classification';
 import { daysRemaining } from '../domain/deadline-utils';
+import { Briefcase, Building2 } from 'lucide-react-native';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -34,26 +35,36 @@ export function OpportunityCard({ opportunity, onPress }: OpportunityCardProps) 
       ]}
     >
       <View style={styles.headerRow}>
-        <View style={styles.badges}>
-          <StatusBadge status={opportunity.status} />
-          {opportunity.status !== 'APPLIED' && opportunity.status !== 'ARCHIVED' && (
-            <DeadlineBadge urgency={urgency} daysRemaining={days} />
-          )}
-        </View>
-        <Typography variant="caption" color={theme.colors.textTertiary}>
-          {opportunity.opportunityType}
+        <Typography variant="heading3" style={styles.title} numberOfLines={2}>
+          {opportunity.title}
         </Typography>
+        
+        {opportunity.status !== 'APPLIED' && opportunity.status !== 'ARCHIVED' && (
+          <DeadlineBadge urgency={urgency} daysRemaining={days} />
+        )}
       </View>
 
-      <Typography variant="heading3" style={styles.title} numberOfLines={2}>
-        {opportunity.title}
-      </Typography>
+      <View style={styles.metadataRow}>
+        {opportunity.organization && (
+          <View style={styles.metadataItem}>
+            <Building2 size={14} color={theme.colors.textTertiary} style={styles.icon} />
+            <Typography variant="caption" color={theme.colors.textSecondary} numberOfLines={1}>
+              {opportunity.organization}
+            </Typography>
+          </View>
+        )}
+        
+        <View style={styles.metadataItem}>
+          <Briefcase size={14} color={theme.colors.textTertiary} style={styles.icon} />
+          <Typography variant="caption" color={theme.colors.textSecondary} numberOfLines={1}>
+            {opportunity.opportunityType}
+          </Typography>
+        </View>
+      </View>
 
-      {opportunity.organization && (
-        <Typography variant="bodySmall" color={theme.colors.textSecondary} numberOfLines={1}>
-          {opportunity.organization}
-        </Typography>
-      )}
+      <View style={styles.footerRow}>
+        <StatusBadge status={opportunity.status} />
+      </View>
     </TouchableOpacity>
   );
 }
@@ -68,13 +79,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: 12,
     marginBottom: 8,
   },
-  badges: {
-    flexDirection: 'row',
-    gap: 8,
-  },
   title: {
-    marginBottom: 4,
+    flex: 1,
+    lineHeight: 24,
+  },
+  metadataRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 16,
+  },
+  metadataItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+  },
+  icon: {
+    marginRight: 6,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    borderTopWidth: 1,
+    borderTopColor: '#E4E8EC',
+    paddingTop: 12,
   },
 });
