@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Lint, Typecheck & Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: applyalert
+          POSTGRES_PASSWORD: applyalert
+          POSTGRES_DB: applyalert_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @applyalert/api prisma:generate
+
+      - name: Run Typecheck
+        run: |
+          pnpm --filter @applyalert/contracts typecheck
+          pnpm --filter @applyalert/validation typecheck
+          pnpm --filter @applyalert/api typecheck
+          pnpm --filter @applyalert/mobile typecheck
+
+      - name: Run API Tests
+        env:
+          DATABASE_URL: postgresql://applyalert:applyalert@localhost:5432/applyalert_test?schema=public
+        run: |
+          pnpm --filter @applyalert/api test
+
+      - name: Run Mobile Unit Tests
+        run: |
+          pnpm --filter @applyalert/mobile test ApiClient.test.ts
