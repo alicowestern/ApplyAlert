@@ -78,18 +78,20 @@ export function EditOpportunityScreen({ route, navigation }: Props) {
 
     updateOpportunity.mutate(
       {
-        ...opportunity,
-        title: title.trim(),
-        organization: organization.trim() || null,
-        summary: summary.trim() || null,
-        location: location.trim() || null,
-        applicationUrl: url.trim() || null,
-        deadline: {
-          ...opportunity.deadline,
-          kind: date ? 'DATE_ONLY' : 'NONE_STATED',
-          originalText: date || opportunity.deadline.originalText,
-          localDate: date || null,
-        }
+        id: opportunity.id,
+        updates: {
+          title: title.trim(),
+          organization: organization.trim() || null,
+          summary: summary.trim() || null,
+          location: location.trim() || null,
+          applicationUrl: url.trim() || null,
+          deadline: {
+            ...opportunity.deadline,
+            kind: date ? 'DATE_ONLY' : 'NONE_STATED',
+            originalText: date || opportunity.deadline.originalText,
+            localDate: date || null,
+          },
+        },
       },
       {
         onSuccess: () => {

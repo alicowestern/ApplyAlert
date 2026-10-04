@@ -83,7 +83,7 @@ export function ManualAddScreen({ navigation }: AddStackScreenProps<'ManualAdd'>
       },
       {
         onSuccess: () => {
-          navigation.navigate('HomeTab', {
+          navigation.navigate('Home', {
             screen: 'HomeMain',
           });
         },

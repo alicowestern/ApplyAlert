@@ -103,7 +103,7 @@ export function OpportunityDetailScreen({ route, navigation }: Props) {
           <View style={styles.topActions}>
             <TouchableOpacity 
               style={styles.iconButton} 
-              onPress={() => navigation.navigate('EditOpportunity', { id })}
+              onPress={() => (navigation as any).navigate('EditOpportunity', { id })}
             >
               <Edit3 size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>

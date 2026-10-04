@@ -52,7 +52,7 @@ export function ReviewOpportunityScreen({ route, navigation }: AddStackScreenPro
       },
       {
         onSuccess: () => {
-          navigation.navigate('HomeTab', {
+          navigation.navigate('Home', {
             screen: 'HomeMain',
           });
         },
