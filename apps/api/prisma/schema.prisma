@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  opportunities Opportunity[]
+}
+
+model Opportunity {
+  id             String    @id @default(uuid())
+  userId         String
+  title          String
+  organization   String?
+  opportunityType String
+  summary        String?
+  location       String?
+  
+  // FundingInfo flattened
+  fundingIsFunded Boolean?
+  fundingDetails  String?
+
+  applicationUrl String?
+
+  status         String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  appliedAt      DateTime?
+  archivedAt     DateTime?
+
+  // Relations
+  user           User              @relation(fields: [userId], references: [id])
+  source         OpportunitySource?
+  deadline       OpportunityDeadline?
+
+  @@index([userId, status])
+  @@index([userId, archivedAt])
+  @@index([userId, createdAt])
+}
+
+model OpportunitySource {
+  id            String   @id @default(uuid())
+  opportunityId String   @unique
+  type          String
+  url           String?
+  rawText       String?
+  fileName      String?
+  mimeType      String?
+  fileRef       String?
+  importedAt    DateTime @default(now())
+
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+}
+
+model OpportunityDeadline {
+  id            String   @id @default(uuid())
+  opportunityId String   @unique
+  kind          String
+  originalText  String?
+  
+  // DATE_ONLY preserves the calendar date string without timezone interference
+  localDate     String?
+  localTime     String?
+  timezone      String?
+  utcInstant    DateTime?
+  
+  confidence    Float    @default(1.0)
+  userConfirmed Boolean  @default(false)
+  evidence      String?
+  alternativeCandidates String[] // Stored as scalar list (PostgreSQL specific)
+
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+}
