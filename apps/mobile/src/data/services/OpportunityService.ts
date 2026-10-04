@@ -1,9 +1,8 @@
 /**
  * Domain service for managing Opportunities.
  * 
- * Contains business logic, validation, and coordinates with the repository.
- * UI components should use this service (via React Query hooks) rather than
- * calling the repository directly.
+ * Contains business logic, validation, coordinates with the repository,
+ * and enqueues changes for offline-first backend synchronization.
  */
 
 import 'react-native-get-random-values';
@@ -13,6 +12,8 @@ import type { Opportunity, ApplicationStatus } from '@applyalert/contracts';
 import { ok, err, type Result } from '../../types/result';
 import { opportunityRepository } from '../repository';
 import { applyStatusTransition } from '../../domain/status-transitions';
+import { syncQueue } from '../sync/SyncQueue';
+import { syncService } from '../sync/SyncService';
 
 export class OpportunityService {
   /**
@@ -46,7 +47,7 @@ export class OpportunityService {
 
   /**
    * Create a new opportunity.
-   * Generates ID, timestamps, validates, and persists.
+   * Generates ID, timestamps, validates, persists, and queues for sync.
    */
   async createOpportunity(data: Omit<Opportunity, 'id' | 'createdAt' | 'updatedAt' | 'appliedAt' | 'archivedAt'>): Promise<Result<Opportunity>> {
     const now = new Date().toISOString();
@@ -60,7 +61,6 @@ export class OpportunityService {
       archivedAt: data.status === 'ARCHIVED' ? now : null,
     };
 
-    // Validate against schema before saving
     const validationResult = OpportunitySchema.safeParse(newOpportunity);
     if (!validationResult.success) {
       return err(new Error(`Validation failed: ${validationResult.error.message}`));
@@ -68,6 +68,14 @@ export class OpportunityService {
 
     const saveResult = await opportunityRepository.create(validationResult.data);
     if (!saveResult.ok) return err(saveResult.error);
+
+    // Queue for sync and trigger push
+    syncQueue.enqueue({
+      type: 'CREATE',
+      opportunityId: validationResult.data.id,
+      payload: validationResult.data,
+    });
+    this.triggerBackgroundPush();
 
     return ok(validationResult.data);
   }
@@ -96,6 +104,14 @@ export class OpportunityService {
     const saveResult = await opportunityRepository.update(validationResult.data);
     if (!saveResult.ok) return err(saveResult.error);
 
+    // Queue for sync and trigger push
+    syncQueue.enqueue({
+      type: 'UPDATE',
+      opportunityId: validationResult.data.id,
+      payload: validationResult.data,
+    });
+    this.triggerBackgroundPush();
+
     return ok(validationResult.data);
   }
 
@@ -120,6 +136,14 @@ export class OpportunityService {
       const saveResult = await opportunityRepository.update(validationResult.data);
       if (!saveResult.ok) return err(saveResult.error);
 
+      // Queue for sync and trigger push
+      syncQueue.enqueue({
+        type: newStatus === 'ARCHIVED' ? 'ARCHIVE' : 'STATUS_CHANGE',
+        opportunityId: validationResult.data.id,
+        newStatus: newStatus !== 'ARCHIVED' ? newStatus : undefined,
+      });
+      this.triggerBackgroundPush();
+
       return ok(validationResult.data);
     } catch (e) {
       return err(e instanceof Error ? e : new Error('Unknown error during status transition'));
@@ -130,7 +154,26 @@ export class OpportunityService {
    * Permanently delete an opportunity.
    */
   async deleteOpportunity(id: string): Promise<Result<void>> {
-    return opportunityRepository.delete(id);
+    const deleteResult = await opportunityRepository.delete(id);
+    if (!deleteResult.ok) return err(deleteResult.error);
+
+    syncQueue.enqueue({
+      type: 'DELETE',
+      opportunityId: id,
+    });
+    this.triggerBackgroundPush();
+
+    return ok(undefined);
+  }
+
+  /**
+   * Trigger a non-blocking push to the server.
+   */
+  private triggerBackgroundPush() {
+    // Fire and forget
+    syncService.pushOnly().catch(err => {
+      console.warn('Background sync trigger failed', err);
+    });
   }
 }
 

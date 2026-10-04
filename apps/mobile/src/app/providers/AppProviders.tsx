@@ -8,6 +8,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryProvider } from './QueryProvider';
+import { SyncProvider } from './SyncProvider';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -17,9 +18,11 @@ export function AppProviders({ children }: AppProvidersProps) {
   return (
     <SafeAreaProvider>
       <QueryProvider>
-        <NavigationContainer>
-          {children}
-        </NavigationContainer>
+        <SyncProvider>
+          <NavigationContainer>
+            {children}
+          </NavigationContainer>
+        </SyncProvider>
       </QueryProvider>
     </SafeAreaProvider>
   );
