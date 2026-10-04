@@ -20,3 +20,10 @@ export {
   OpportunitySchema,
   type ValidatedOpportunity,
 } from './schemas/opportunity';
+
+export {
+  CreateOpportunityDtoSchema,
+  UpdateOpportunityDtoSchema,
+  UpdateStatusDtoSchema,
+  ListOpportunitiesQuerySchema,
+} from './schemas/api';

@@ -2,11 +2,10 @@
  * API contract types for ApplyAlert.
  *
  * These define the shape of request/response payloads
- * for the future backend API. The actual API is not
- * implemented yet.
+ * for the backend API.
  */
 
-import type { Opportunity } from '../domain/opportunity';
+import type { Opportunity, ApplicationStatus } from '../domain/opportunity';
 
 /**
  * Standard API response wrapper.
@@ -23,18 +22,47 @@ export interface ApiResponse<T> {
 export interface ApiError {
   readonly code: string;
   readonly message: string;
+  readonly requestId?: string;
   readonly details?: Record<string, unknown>;
 }
 
 /**
- * Paginated list response.
+ * Paginated list response using cursor-based pagination.
  */
 export interface PaginatedResponse<T> {
   readonly items: readonly T[];
-  readonly total: number;
-  readonly page: number;
-  readonly pageSize: number;
+  readonly nextCursor: string | null;
   readonly hasMore: boolean;
+  readonly totalCount?: number;
+}
+
+/**
+ * Query parameters for listing opportunities.
+ */
+export interface ListOpportunitiesQuery {
+  readonly status?: ApplicationStatus;
+  readonly archived?: boolean;
+  readonly search?: string;
+  readonly sort?: 'deadline' | 'createdAt' | 'updatedAt';
+  readonly limit?: number;
+  readonly cursor?: string;
+}
+
+/**
+ * Data Transfer Object for creating an Opportunity.
+ */
+export type CreateOpportunityDto = Omit<Opportunity, 'id' | 'createdAt' | 'updatedAt' | 'appliedAt' | 'archivedAt'>;
+
+/**
+ * Data Transfer Object for updating an Opportunity.
+ */
+export type UpdateOpportunityDto = Partial<Pick<Opportunity, 'title' | 'organization' | 'opportunityType' | 'summary' | 'location' | 'funding' | 'applicationUrl' | 'deadline'>>;
+
+/**
+ * Data Transfer Object for updating an Opportunity's status.
+ */
+export interface UpdateStatusDto {
+  readonly status: ApplicationStatus;
 }
 
 /**

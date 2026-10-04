@@ -36,6 +36,10 @@ export type {
   ApiResponse,
   ApiError,
   PaginatedResponse,
+  ListOpportunitiesQuery,
+  CreateOpportunityDto,
+  UpdateOpportunityDto,
+  UpdateStatusDto,
   SubmitInputRequest,
   ExtractionResponse,
 } from './api/endpoints';
