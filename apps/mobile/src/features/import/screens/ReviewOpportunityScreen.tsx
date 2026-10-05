@@ -3,52 +3,53 @@ import { StyleSheet, View, TextInput, ScrollView, TouchableOpacity, Alert } from
 import { ScreenContainer } from '../../../components/ScreenContainer';
 import { Typography } from '../../../components/Typography';
 import { useAppTheme } from '../../../hooks/useAppTheme';
-import { useCreateOpportunity } from '../../../data/hooks/useOpportunityMutations';
+import { useConfirmExtraction } from '../../../data/hooks/useExtractionHooks';
 import type { AddStackScreenProps } from '../../../app/navigation/types';
 import { ChevronLeft, Info } from 'lucide-react-native';
 
 export function ReviewOpportunityScreen({ route, navigation }: AddStackScreenProps<'ReviewOpportunity'>) {
   const { initialData } = route.params;
   const theme = useAppTheme();
-  const createOpportunity = useCreateOpportunity();
+  const confirmExtraction = useConfirmExtraction();
 
   const [title, setTitle] = useState(initialData.title || '');
   const [organization, setOrganization] = useState(initialData.organization || '');
   const [url, setUrl] = useState(initialData.url || '');
   const [date, setDate] = useState(initialData.date || '');
+  const [opportunityType] = useState(initialData.opportunityType || 'OTHER');
 
   const handleSave = () => {
-    createOpportunity.mutate(
+    if (!initialData.extractionId) {
+      Alert.alert('Error', 'Missing extraction reference');
+      return;
+    }
+
+    const kind = date ? (initialData.deadline?.kind || 'DATE_ONLY') : 'NONE_STATED';
+
+    confirmExtraction.mutate(
       {
-        title: title.trim(),
-        organization: organization.trim() || null,
-        opportunityType: 'OTHER',
-        summary: null,
-        location: null,
-        funding: null,
-        applicationUrl: url.trim() || null,
-        source: {
-          type: 'TEXT',
-          url: null,
-          rawText: null,
-          fileName: null,
-          mimeType: null,
-          fileRef: null,
-          importedAt: new Date().toISOString(),
-        },
-        deadline: {
-          kind: date ? 'DATE_ONLY' : 'NONE_STATED',
-          originalText: date || null,
-          localDate: date || null,
-          localTime: null,
-          timezone: null,
-          utcInstant: null,
-          confidence: 0.8, // Indicates extraction
-          userConfirmed: true,
-          evidence: null,
-          alternativeCandidates: [],
-        },
-        status: 'SAVED',
+        extractionId: initialData.extractionId,
+        dto: {
+          title: title.trim(),
+          organization: organization.trim() || null,
+          opportunityType: opportunityType,
+          summary: initialData.summary || null,
+          location: initialData.location || null,
+          funding: initialData.funding || null,
+          applicationUrl: url.trim() || null,
+          deadline: {
+            kind: kind,
+            originalText: date || null,
+            localDate: date || null,
+            localTime: initialData.deadline?.time || null,
+            timezone: initialData.deadline?.timezone || null,
+            utcInstant: null,
+            confidence: initialData.deadline?.confidence || 0.8,
+            userConfirmed: true,
+            evidence: initialData.deadline?.evidence || null,
+            alternativeCandidates: [],
+          },
+        }
       },
       {
         onSuccess: () => {
@@ -135,13 +136,13 @@ export function ReviewOpportunityScreen({ route, navigation }: AddStackScreenPro
           <TouchableOpacity 
             style={[
               styles.saveButton, 
-              { backgroundColor: createOpportunity.isPending ? theme.colors.neutral[300] : theme.colors.primary[500] }
+              { backgroundColor: confirmExtraction.isPending ? theme.colors.neutral[300] : theme.colors.primary[500] }
             ]}
             onPress={handleSave}
-            disabled={createOpportunity.isPending}
+            disabled={confirmExtraction.isPending}
           >
             <Typography variant="label" color={theme.colors.textInverse}>
-              {createOpportunity.isPending ? 'Saving...' : 'Confirm & Save'}
+              {confirmExtraction.isPending ? 'Saving...' : 'Confirm & Save'}
             </Typography>
           </TouchableOpacity>
         </View>

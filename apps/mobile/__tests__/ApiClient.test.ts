@@ -159,4 +159,95 @@ describe('ApiClient', () => {
     expect(url).toBe('http://api.applyalert.local/api/v1/opportunities/opp-123');
     expect(init.method).toBe('DELETE');
   });
+
+  describe('Import API methods', () => {
+    it('creates a text import', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => ({
+          success: true,
+          data: {
+            id: 'imp-text-1',
+            inputType: 'TEXT',
+            status: 'READY_FOR_EXTRACTION',
+            contentHash: 'abc123hash',
+          },
+          error: null,
+        }),
+      });
+
+      const res = await client.createTextImport({ text: 'Some opportunity announcement' });
+
+      expect(res.id).toBe('imp-text-1');
+      expect(res.status).toBe('READY_FOR_EXTRACTION');
+      const [url, init] = mockFetch.mock.calls[0];
+      expect(url).toBe('http://api.applyalert.local/api/v1/imports/text');
+      expect(init.method).toBe('POST');
+      expect(JSON.parse(init.body)).toEqual({ text: 'Some opportunity announcement' });
+    });
+
+    it('creates a URL import', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        json: async () => ({
+          success: true,
+          data: {
+            id: 'imp-url-1',
+            inputType: 'URL',
+            status: 'PENDING',
+          },
+          error: null,
+        }),
+      });
+
+      const res = await client.createUrlImport({ url: 'https://example.com/fellowship' });
+
+      expect(res.id).toBe('imp-url-1');
+      const [url, init] = mockFetch.mock.calls[0];
+      expect(url).toBe('http://api.applyalert.local/api/v1/imports/url');
+      expect(init.method).toBe('POST');
+    });
+
+    it('gets an import by ID', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          success: true,
+          data: {
+            id: 'imp-1',
+            status: 'READY_FOR_EXTRACTION',
+          },
+          error: null,
+        }),
+      });
+
+      const res = await client.getImport('imp-1');
+      expect(res.id).toBe('imp-1');
+      expect(res.status).toBe('READY_FOR_EXTRACTION');
+    });
+
+    it('cancels an in-flight import', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          success: true,
+          data: {
+            id: 'imp-1',
+            status: 'CANCELLED',
+          },
+          error: null,
+        }),
+      });
+
+      const res = await client.cancelImport('imp-1');
+      expect(res.status).toBe('CANCELLED');
+      const [url, init] = mockFetch.mock.calls[0];
+      expect(url).toBe('http://api.applyalert.local/api/v1/imports/imp-1/cancel');
+      expect(init.method).toBe('POST');
+    });
+  });
 });

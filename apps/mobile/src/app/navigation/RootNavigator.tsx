@@ -17,11 +17,15 @@ import { HomeScreen } from '../../features/home/screens/HomeScreen';
 import { AddOpportunityScreen } from '../../features/import/screens/AddOpportunityScreen';
 import { ManualAddScreen } from '../../features/import/screens/ManualAddScreen';
 import { ReviewOpportunityScreen } from '../../features/import/screens/ReviewOpportunityScreen';
+import { ImportProcessingScreen } from '../../features/import/screens/ImportProcessingScreen';
+import { SharePreviewScreen } from '../../features/import/screens/SharePreviewScreen';
+import { PasteInputScreen } from '../../features/import/screens/PasteInputScreen';
 import { ApplicationsScreen } from '../../features/opportunity/screens/ApplicationsScreen';
 import { OpportunityDetailScreen } from '../../features/opportunity/screens/OpportunityDetailScreen';
 import { SettingsScreen } from '../../features/settings/screens/SettingsScreen';
 import { ArchivedOpportunitiesScreen } from '../../features/settings/screens/ArchivedOpportunitiesScreen';
 import { EditOpportunityScreen } from '../../features/opportunity/screens/EditOpportunityScreen';
+import { ShareImportCoordinator } from '../../services/sharing/ShareImportCoordinator';
 
 import type { RootTabParamList, HomeStackParamList, AddStackParamList, ApplicationsStackParamList, SettingsStackParamList } from './types';
 
@@ -58,8 +62,11 @@ function AddStackNavigator() {
   return (
     <AddStack.Navigator screenOptions={{ headerShown: false }}>
       <AddStack.Screen name="AddMain" component={AddOpportunityScreen} />
+      <AddStack.Screen name="PasteInput" component={PasteInputScreen} />
+      <AddStack.Screen name="ImportProcessing" component={ImportProcessingScreen} />
       <AddStack.Screen name="ManualAdd" component={ManualAddScreen} />
       <AddStack.Screen name="ReviewOpportunity" component={ReviewOpportunityScreen} />
+      <AddStack.Screen name="SharePreview" component={SharePreviewScreen} />
     </AddStack.Navigator>
   );
 }
@@ -87,6 +94,7 @@ export function RootNavigator() {
   const theme = useAppTheme();
 
   return (
+    <>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
@@ -126,6 +134,9 @@ export function RootNavigator() {
         options={{ tabBarLabel: 'Settings', tabBarIcon: SettingsIcon }}
       />
     </Tab.Navigator>
+    {/* Coordinator mounted here has access to global navigation state */}
+    <ShareImportCoordinator />
+    </>
   );
 }
 

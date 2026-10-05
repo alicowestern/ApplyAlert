@@ -94,7 +94,8 @@ export function AddOpportunityScreen({ navigation }: AddStackScreenProps<'AddMai
           IconComponent={Link}
           label="Paste Link or Text"
           description="Paste a URL or text containing opportunity details"
-          disabled={true}
+          disabled={false}
+          onPress={() => navigation.navigate('PasteInput')}
         />
 
         <ImportOption

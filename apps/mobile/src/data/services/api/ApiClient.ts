@@ -8,6 +8,10 @@ import {
   ListOpportunitiesQuery,
   ApiResponse,
   ApiError,
+  ImportResponseDto,
+  CreateTextImportDto,
+  CreateUrlImportDto,
+  ListImportsQuery,
 } from '@applyalert/contracts';
 
 declare const process: {
@@ -73,7 +77,8 @@ export class ApiClient {
     const url = `${this.baseUrl}${path}`;
     const headers = new Headers(options.headers);
 
-    if (!headers.has('Content-Type') && options.body) {
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    if (!headers.has('Content-Type') && options.body && !isFormData) {
       headers.set('Content-Type', 'application/json');
     }
     if (!headers.has('Accept')) {
@@ -116,6 +121,8 @@ export class ApiClient {
 
     return json.data;
   }
+
+  // ─── Opportunities ─────────────────────────────────────────────
 
   async createOpportunity(dto: CreateOpportunityDto): Promise<Opportunity> {
     return this.request<Opportunity>('/opportunities', {
@@ -177,6 +184,79 @@ export class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // ─── Imports ───────────────────────────────────────────────────
+
+  async createTextImport(dto: CreateTextImportDto): Promise<ImportResponseDto> {
+    return this.request<ImportResponseDto>('/imports/text', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  }
+
+  async createUrlImport(dto: CreateUrlImportDto): Promise<ImportResponseDto> {
+    return this.request<ImportResponseDto>('/imports/url', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  }
+
+  async createFileImport(formData: FormData): Promise<ImportResponseDto> {
+    return this.request<ImportResponseDto>('/imports/file', {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
+  async getImport(id: string): Promise<ImportResponseDto> {
+    return this.request<ImportResponseDto>(`/imports/${encodeURIComponent(id)}`, {
+      method: 'GET',
+    });
+  }
+
+  async listImports(
+    query: ListImportsQuery = {},
+  ): Promise<{ items: ImportResponseDto[]; nextCursor: string | null }> {
+    const params = new URLSearchParams();
+    if (query.status) params.set('status', query.status);
+    if (query.limit) params.set('limit', String(query.limit));
+    if (query.cursor) params.set('cursor', query.cursor);
+
+    const queryString = params.toString();
+    const path = `/imports${queryString ? `?${queryString}` : ''}`;
+    return this.request<{ items: ImportResponseDto[]; nextCursor: string | null }>(path, {
+      method: 'GET',
+    });
+  }
+
+  async cancelImport(id: string): Promise<ImportResponseDto> {
+    return this.request<ImportResponseDto>(`/imports/${encodeURIComponent(id)}/cancel`, {
+      method: 'POST',
+    });
+  }
+
+  // ─── Extractions ───────────────────────────────────────────────
+
+  async triggerExtraction(importId: string, input: any): Promise<{ success: boolean; data: { id: string; status: string } }> {
+    return this.request<any>(`/imports/${encodeURIComponent(importId)}/extract`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async getExtraction(id: string): Promise<any> {
+    return this.request<any>(`/extractions/${encodeURIComponent(id)}`, {
+      method: 'GET',
+    });
+  }
+
+  async confirmExtraction(id: string, dto: any): Promise<any> {
+    return this.request<any>(`/extractions/${encodeURIComponent(id)}/confirm`, {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  }
 }
 
 export const defaultApiClient = new ApiClient();
+

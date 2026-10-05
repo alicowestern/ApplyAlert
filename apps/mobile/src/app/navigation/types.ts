@@ -18,7 +18,10 @@ export type HomeStackParamList = {
 export type AddStackParamList = {
   AddMain: undefined;
   ManualAdd: undefined;
+  PasteInput: { mode?: 'URL' | 'TEXT' } | undefined;
+  ImportProcessing: { importId: string };
   ReviewOpportunity: { initialData: any };
+  SharePreview: { sharedContent: import('../../services/sharing/types').SharedContent };
 };
 
 export type ApplicationsStackParamList = {

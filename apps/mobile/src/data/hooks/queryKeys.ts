@@ -12,3 +12,11 @@ export const opportunityKeys = {
   details: () => [...opportunityKeys.all, 'detail'] as const,
   detail: (id: string) => [...opportunityKeys.details(), id] as const,
 };
+
+export const importKeys = {
+  all: ['imports'] as const,
+  lists: () => [...importKeys.all, 'list'] as const,
+  details: () => [...importKeys.all, 'detail'] as const,
+  detail: (id: string) => [...importKeys.details(), id] as const,
+};
+
