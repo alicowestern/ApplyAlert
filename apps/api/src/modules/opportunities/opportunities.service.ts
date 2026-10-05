@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RemindersService } from '../reminders/reminders.service';
 import { OpportunityMapper } from './opportunity-mapper';
 import {
   Opportunity,
@@ -14,7 +15,10 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class OpportunitiesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly remindersService: RemindersService
+  ) {}
 
   async create(userId: string, dto: CreateOpportunityDto): Promise<Opportunity> {
     // Ensure user exists (dev user or registered)
@@ -69,6 +73,15 @@ export class OpportunitiesService {
         deadline: true,
       },
     });
+
+    if (dto.deadline?.userConfirmed) {
+      await this.remindersService.generateRemindersForOpportunity(record.id, userId, {
+        smartRemindersEnabled: true,
+        dateOnlyDefaultHour: 9,
+        dateOnlyDefaultMinute: 0,
+        enabledOffsets: ['THIRTY_DAYS', 'FOURTEEN_DAYS', 'SEVEN_DAYS', 'THREE_DAYS', 'ONE_DAY', 'DEADLINE_DAY']
+      });
+    }
 
     return OpportunityMapper.toDomain(record);
   }

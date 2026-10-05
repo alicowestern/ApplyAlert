@@ -5,30 +5,38 @@
  * for the future reminder scheduling system.
  */
 
-/**
- * A scheduled reminder for an opportunity deadline.
- */
+export type ReminderType =
+  | 'THIRTY_DAYS'
+  | 'FOURTEEN_DAYS'
+  | 'SEVEN_DAYS'
+  | 'THREE_DAYS'
+  | 'ONE_DAY'
+  | 'DEADLINE_DAY'
+  | 'CUSTOM';
+
+export type ReminderStatus =
+  | 'PENDING'
+  | 'SCHEDULED'
+  | 'DELIVERED'
+  | 'CANCELLED'
+  | 'SKIPPED'
+  | 'FAILED';
+
+export type ReminderChannel = 'LOCAL' | 'PUSH';
+
 export interface Reminder {
-  /** Unique identifier. */
-  readonly id: string;
-
-  /** The opportunity this reminder belongs to. */
-  readonly opportunityId: string;
-
-  /**
-   * Scheduled time as ISO 8601 UTC instant.
-   * When the reminder should fire.
-   */
-  readonly scheduledAt: string;
-
-  /** Human-readable label (e.g., "7 days before deadline"). */
-  readonly label: string;
-
-  /** Whether this reminder has been delivered. */
-  readonly delivered: boolean;
-
-  /** Whether this reminder was cancelled (e.g., user marked APPLIED). */
-  readonly cancelled: boolean;
+  id: string;
+  userId: string;
+  opportunityId: string;
+  type: ReminderType;
+  status: ReminderStatus;
+  channel: ReminderChannel;
+  scheduledFor: string; // ISO 8601 UTC instant
+  createdAt: string;
+  updatedAt: string;
+  deliveredAt?: string | null;
+  cancelledAt?: string | null;
+  deviceScheduleId?: string | null;
 }
 
 /**

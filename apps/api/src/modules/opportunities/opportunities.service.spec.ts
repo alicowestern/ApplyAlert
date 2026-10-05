@@ -3,6 +3,7 @@ import { OpportunitiesService } from './opportunities.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateOpportunityDto } from '@applyalert/contracts';
+import { RemindersService } from '../reminders/reminders.service';
 
 describe('OpportunitiesService', () => {
   let service: OpportunitiesService;
@@ -28,6 +29,13 @@ describe('OpportunitiesService', () => {
         {
           provide: PrismaService,
           useValue: mockPrisma,
+        },
+        {
+          provide: RemindersService,
+          useValue: {
+            generateRemindersForOpportunity: jest.fn(),
+            cancelRemindersForOpportunity: jest.fn(),
+          },
         },
       ],
     }).compile();

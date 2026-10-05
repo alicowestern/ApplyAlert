@@ -13,6 +13,9 @@ model User {
   updatedAt DateTime @updatedAt
 
   opportunities Opportunity[]
+  imports       Import[]
+  extractions   Extraction[]
+  reminders     Reminder[]
 }
 
 model Opportunity {
@@ -40,6 +43,7 @@ model Opportunity {
   user           User              @relation(fields: [userId], references: [id])
   source         OpportunitySource?
   deadline       OpportunityDeadline?
+  reminders      Reminder[]
 
   @@index([userId, status])
   @@index([userId, archivedAt])
@@ -78,4 +82,100 @@ model OpportunityDeadline {
   alternativeCandidates String[] // Stored as scalar list (PostgreSQL specific)
 
   opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+}
+
+model Import {
+  id          String   @id @default(uuid())
+  userId      String
+  inputType   String   // URL, TEXT, IMAGE, PDF
+  status      String   // PENDING, PROCESSING, READY_FOR_EXTRACTION, FAILED, CANCELLED
+
+  // URL imports
+  originalUrl String?
+  finalUrl    String?
+
+  // Text imports
+  originalText String?
+
+  // File imports (Image/PDF)
+  fileName    String?  // Original filename (metadata only)
+  mimeType    String?
+  fileSize    Int?
+  storageKey  String?  // Server-generated key in ObjectStorage
+
+  // Processing results
+  normalizedText String?  // Extracted/normalized text
+  contentHash    String?  // SHA-256 of normalized content
+
+  // Error tracking
+  errorCode       String?
+  errorMessage    String?
+
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  processingStartedAt   DateTime?
+  processingCompletedAt DateTime?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  extraction Extraction?
+
+  @@index([userId, status])
+  @@index([createdAt])
+  @@index([contentHash])
+}
+
+model Extraction {
+  id        String   @id @default(uuid())
+  importId  String   @unique
+  userId    String
+  status    String   // PENDING, PROCESSING, READY_FOR_REVIEW, FAILED, CANCELLED
+
+  provider      String?
+  model         String?
+  promptVersion String?
+  schemaVersion String?
+
+  result          Json?
+  confidenceLevel String?
+  warnings        String[] // Stored as scalar list (PostgreSQL specific)
+
+  errorCode       String?
+  errorMessage    String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  processingStartedAt   DateTime?
+  processingCompletedAt DateTime?
+
+  // Relations
+  import Import @relation(fields: [importId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+  @@index([createdAt])
+}
+
+model Reminder {
+  id               String    @id @default(uuid())
+  userId           String
+  opportunityId    String
+  type             String    // THIRTY_DAYS, FOURTEEN_DAYS, SEVEN_DAYS, THREE_DAYS, ONE_DAY, DEADLINE_DAY, CUSTOM
+  status           String    // PENDING, SCHEDULED, DELIVERED, CANCELLED, SKIPPED, FAILED
+  channel          String    // LOCAL, PUSH
+  scheduledFor     DateTime
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deliveredAt      DateTime?
+  cancelledAt      DateTime?
+  deviceScheduleId String?
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id])
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([opportunityId, status])
+  @@index([scheduledFor, status])
 }

@@ -27,3 +27,21 @@ export {
   UpdateStatusDtoSchema,
   ListOpportunitiesQuerySchema,
 } from './schemas/api';
+
+export {
+  ImportStatusSchema,
+  ImportInputTypeSchema,
+  CreateTextImportSchema,
+  CreateUrlImportSchema,
+  ListImportsQuerySchema,
+} from './schemas/imports';
+
+export {
+  ExtractionStatusSchema,
+  ExtractionErrorCodeSchema,
+  ExtractionWarningCodeSchema,
+  ExtractedDeadlineCandidateSchema,
+  ExtractionResultSchema,
+  ConfirmExtractionDtoSchema,
+} from './schemas/extractions';
+
