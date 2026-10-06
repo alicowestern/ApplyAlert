@@ -11,6 +11,7 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|@react-navigation|react-native-screens|react-native-safe-area-context|@tanstack|react-native-get-random-values|uuid|react-native-mmkv|lucide-react-native)/)',
   ],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
