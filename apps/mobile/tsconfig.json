@@ -1,16 +1,14 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@applyalert/contracts": ["../../packages/contracts/src/index.ts"],
       "@applyalert/contracts/*": ["../../packages/contracts/src/*"],
       "@applyalert/validation": ["../../packages/validation/src/index.ts"],

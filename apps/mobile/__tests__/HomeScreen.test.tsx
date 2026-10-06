@@ -20,19 +20,32 @@ function renderWithProviders(component: React.ReactElement) {
   );
 }
 
+const mockProps: any = {
+  navigation: {
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+    addListener: jest.fn(() => jest.fn()),
+    isFocused: jest.fn(() => true),
+  },
+  route: {
+    key: 'HomeMain',
+    name: 'HomeMain',
+  },
+};
+
 describe('HomeScreen', () => {
   it('renders without crashing', () => {
-    renderWithProviders(<HomeScreen />);
+    renderWithProviders(<HomeScreen {...mockProps} />);
     expect(screen.getByTestId('home-screen')).toBeTruthy();
   });
 
   it('displays the app name', () => {
-    renderWithProviders(<HomeScreen />);
+    renderWithProviders(<HomeScreen {...mockProps} />);
     expect(screen.getByText('ApplyAlert')).toBeTruthy();
   });
 
   it('shows Urgent and Upcoming sections', () => {
-    renderWithProviders(<HomeScreen />);
+    renderWithProviders(<HomeScreen {...mockProps} />);
     expect(screen.getByText('Urgent')).toBeTruthy();
     expect(screen.getByText('Upcoming')).toBeTruthy();
   });
