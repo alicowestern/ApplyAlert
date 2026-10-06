@@ -4,8 +4,20 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HomeScreen } from '../src/features/home/screens/HomeScreen';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
 // Wrap component with required providers for testing
 function renderWithProviders(component: React.ReactElement) {
+  const queryClient = createTestQueryClient();
   return render(
     <SafeAreaProvider
       initialMetrics={{
@@ -13,9 +25,11 @@ function renderWithProviders(component: React.ReactElement) {
         insets: { top: 44, left: 0, right: 0, bottom: 34 },
       }}
     >
-      <NavigationContainer>
-        {component}
-      </NavigationContainer>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer>
+          {component}
+        </NavigationContainer>
+      </QueryClientProvider>
     </SafeAreaProvider>,
   );
 }
