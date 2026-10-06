@@ -54,18 +54,53 @@ const mockProps: any = {
   },
 };
 
+import { useSortedOpportunities } from '../src/data/hooks/useOpportunityQueries';
+
 describe('HomeScreen', () => {
-  it('renders without crashing', () => {
+  it('renders empty state when no opportunities exist', () => {
+    (useSortedOpportunities as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+    });
+
     renderWithProviders(<HomeScreen {...mockProps} />);
     expect(screen.getByTestId('home-screen')).toBeTruthy();
+    expect(screen.getByText('Never lose track of an opportunity again.')).toBeTruthy();
   });
 
-  it('displays the app name', () => {
-    renderWithProviders(<HomeScreen {...mockProps} />);
-    expect(screen.getByText('ApplyAlert')).toBeTruthy();
-  });
+  it('shows Urgent and Upcoming sections when opportunities are present', () => {
+    const mockOpportunities = [
+      {
+        id: '1',
+        title: 'Urgent Grant',
+        type: 'GRANT',
+        status: 'PREPARING',
+        deadline: {
+          kind: 'EXACT_INSTANT',
+          utcInstant: new Date(Date.now() + 86400000).toISOString(),
+          confidence: 1,
+          userConfirmed: true,
+        },
+      },
+      {
+        id: '2',
+        title: 'Upcoming Fellowship',
+        type: 'FELLOWSHIP',
+        status: 'PREPARING',
+        deadline: {
+          kind: 'EXACT_INSTANT',
+          utcInstant: new Date(Date.now() + 30 * 86400000).toISOString(),
+          confidence: 1,
+          userConfirmed: true,
+        },
+      },
+    ];
 
-  it('shows Urgent and Upcoming sections', () => {
+    (useSortedOpportunities as jest.Mock).mockReturnValue({
+      data: mockOpportunities,
+      isLoading: false,
+    });
+
     renderWithProviders(<HomeScreen {...mockProps} />);
     expect(screen.getByText('Urgent')).toBeTruthy();
     expect(screen.getByText('Upcoming')).toBeTruthy();
