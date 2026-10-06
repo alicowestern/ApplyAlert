@@ -4,6 +4,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HomeScreen } from '../src/features/home/screens/HomeScreen';
 
+jest.mock('../src/data/hooks/useOpportunityQueries', () => ({
+  useSortedOpportunities: jest.fn(() => ({
+    data: [],
+    isLoading: false,
+  })),
+}));
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const createTestQueryClient = () =>
